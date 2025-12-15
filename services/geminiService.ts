@@ -31,7 +31,7 @@ const fileToGenerativePart = async (file: File): Promise<{ inlineData: { data: s
   });
 };
 
-export const analyzeAudio = async (audioFile: File, styleModifier: string): Promise<string> => {
+export const analyzeAudio = async (audioFile: File, styleModifier: string, language: 'en' | 'vi'): Promise<string> => {
   try {
     const ai = getGeminiClient();
     
@@ -45,7 +45,7 @@ export const analyzeAudio = async (audioFile: File, styleModifier: string): Prom
       contents: {
         parts: [
           audioPart,
-          { text: getSystemInstruction(styleModifier) }
+          { text: getSystemInstruction(styleModifier, language) }
         ]
       }
     });

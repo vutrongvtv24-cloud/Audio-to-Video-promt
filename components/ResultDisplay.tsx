@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { Copy, Check, Download, Film, Palette, FileText } from 'lucide-react';
+import { TEXTS } from '../constants';
 
 interface ResultDisplayProps {
   content: string;
+  language: 'en' | 'vi';
 }
 
-const ResultDisplay: React.FC<ResultDisplayProps> = ({ content }) => {
+const ResultDisplay: React.FC<ResultDisplayProps> = ({ content, language }) => {
   const [copied, setCopied] = useState(false);
+  const t = TEXTS[language];
 
   const handleCopy = () => {
     navigator.clipboard.writeText(content);
@@ -27,19 +30,15 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ content }) => {
   };
 
   const handleDownloadPrompts = () => {
-    // Extract only the prompt lines
     const prompts = content
       .split('\n')
       .map(line => line.trim())
-      // Filter for lines containing "Prompt #"
       .filter(line => line.includes('Prompt #'))
       .map(line => {
-        // Remove markdown formatting like ** and list dashes
-        let clean = line.replace(/\*\*/g, ''); // Remove bold
-        clean = clean.replace(/^-/, ''); // Remove leading dash
+        let clean = line.replace(/\*\*/g, ''); 
+        clean = clean.replace(/^-/, ''); 
         return clean.trim();
       })
-      // Ensure it starts with Prompt # after cleaning to avoid false positives in text description
       .filter(line => line.startsWith('Prompt #'));
 
     if (prompts.length === 0) {
@@ -59,8 +58,6 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ content }) => {
     URL.revokeObjectURL(url);
   };
 
-  // Simple formatting for display purposes (not a full MD parser, but keeps it readable)
-  // We will highlight specific keywords for better UX
   const renderFormattedContent = () => {
     return content.split('\n').map((line, index) => {
       if (line.startsWith('# ')) {
@@ -69,13 +66,13 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ content }) => {
       if (line.startsWith('## ')) {
         return <h2 key={index} className="text-xl font-semibold text-white mt-8 mb-3 flex items-center"><Film className="w-5 h-5 mr-2 text-yellow-500"/>{line.replace('## ', '')}</h2>;
       }
-      if (line.startsWith('**Master Visual Style:**')) {
+      if (line.includes('**Master Visual Style Description:**') || line.includes('**Selected Visual Style:**')) {
          return (
              <div key={index} className="bg-indigo-900/30 border border-indigo-500/30 p-4 rounded-lg my-4">
                  <div className="flex items-center mb-2 text-indigo-400 font-bold uppercase text-xs tracking-wider">
                      <Palette className="w-4 h-4 mr-2" /> consistency lock
                  </div>
-                 <p className="text-indigo-100 font-medium leading-relaxed">{line.replace(/\*\*/g, '')}</p>
+                 <p className="text-indigo-100 font-medium leading-relaxed whitespace-pre-wrap">{line.replace(/\*\*/g, '')}</p>
              </div>
          )
       }
@@ -83,7 +80,6 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ content }) => {
           return <div key={index} className="text-yellow-400 font-mono mt-4 mb-1">{line}</div>
       }
       if (line.trim().startsWith('- **Prompt')) {
-          // Highlight the actual prompt lines
           const parts = line.split('**');
           return (
             <div key={index} className="ml-4 mb-3 p-3 bg-cinematic-800 rounded border border-cinematic-700 hover:border-cinematic-500 transition-colors">
@@ -103,23 +99,21 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ content }) => {
   return (
     <div className="w-full max-w-4xl mx-auto animate-fadeIn">
       <div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-4">
-        <h2 className="text-xl font-semibold text-white">Director's Script</h2>
+        <h2 className="text-xl font-semibold text-white">{t.resultTitle}</h2>
         <div className="flex flex-wrap gap-2 justify-center">
             <button
                 onClick={handleDownloadPrompts}
                 className="flex items-center px-4 py-2 text-sm font-medium text-cinematic-accent bg-cinematic-800 border border-cinematic-700 rounded-lg hover:bg-cinematic-700 hover:border-cinematic-500 transition-all shadow-sm"
-                title="Export list of prompts to TXT"
             >
                 <FileText className="w-4 h-4 mr-2" />
-                Export TXT
+                {t.exportTxt}
             </button>
             <button
                 onClick={handleDownload}
                 className="flex items-center px-4 py-2 text-sm font-medium text-cinematic-accent bg-cinematic-800 border border-cinematic-700 rounded-lg hover:bg-cinematic-700 hover:border-cinematic-500 transition-all shadow-sm"
-                title="Download full script as Markdown"
             >
                 <Download className="w-4 h-4 mr-2" />
-                Download MD
+                {t.downloadMd}
             </button>
             <button
                 onClick={handleCopy}
@@ -130,7 +124,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ content }) => {
                 }`}
             >
                 {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
-                {copied ? "Copied!" : "Copy All"}
+                {copied ? t.copied : t.copy}
             </button>
         </div>
       </div>

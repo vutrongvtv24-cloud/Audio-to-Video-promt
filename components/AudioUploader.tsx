@@ -1,16 +1,18 @@
 import React, { useState, useRef } from 'react';
 import { Upload, FileAudio, AlertCircle } from 'lucide-react';
-import { MAX_FILE_SIZE_MB, SUPPORTED_AUDIO_TYPES } from '../constants';
+import { MAX_FILE_SIZE_MB, SUPPORTED_AUDIO_TYPES, TEXTS } from '../constants';
 
 interface AudioUploaderProps {
   onFileSelect: (file: File) => void;
   disabled: boolean;
+  language: 'en' | 'vi';
 }
 
-const AudioUploader: React.FC<AudioUploaderProps> = ({ onFileSelect, disabled }) => {
+const AudioUploader: React.FC<AudioUploaderProps> = ({ onFileSelect, disabled, language }) => {
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const t = TEXTS[language];
 
   const validateFile = (file: File): boolean => {
     if (!SUPPORTED_AUDIO_TYPES.includes(file.type)) {
@@ -66,7 +68,7 @@ const AudioUploader: React.FC<AudioUploaderProps> = ({ onFileSelect, disabled })
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto mb-8">
+    <div className="w-full max-w-2xl mx-auto mb-8 animate-fadeIn">
       <div
         className={`relative flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-xl transition-all duration-300 ease-in-out cursor-pointer
         ${dragActive ? "border-cinematic-accent bg-cinematic-800/50 scale-[1.02]" : "border-cinematic-700 bg-cinematic-800/30 hover:border-cinematic-500"}
@@ -92,10 +94,10 @@ const AudioUploader: React.FC<AudioUploaderProps> = ({ onFileSelect, disabled })
                 {dragActive ? <FileAudio size={48} /> : <Upload size={48} />}
             </div>
           <p className="mb-2 text-lg font-semibold text-gray-200">
-            {dragActive ? "Drop the audio here" : "Click to upload or drag and drop"}
+            {dragActive ? t.dropHere : t.uploadClick}
           </p>
           <p className="text-sm text-gray-400">
-            MP3, WAV, AAC, M4A (Max {MAX_FILE_SIZE_MB}MB)
+            {t.uploadLimit(MAX_FILE_SIZE_MB)}
           </p>
         </div>
       </div>
