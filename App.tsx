@@ -48,7 +48,7 @@ const App: React.FC = () => {
               <Video className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight text-white">AI Video Director</h1>
+              <h1 className="text-xl font-bold tracking-tight text-white">Audio to Video Prompts</h1>
               <p className="text-xs text-indigo-400 font-mono tracking-wider">PROMPT ENGINEER AGENT</p>
             </div>
           </div>
@@ -112,9 +112,12 @@ const App: React.FC = () => {
 
       {/* Footer */}
       <footer className="border-t border-cinematic-800 bg-cinematic-900 py-8 mt-auto">
-        <div className="container mx-auto px-6 text-center">
+        <div className="container mx-auto px-6 text-center space-y-2">
             <p className="text-sm text-gray-500">
                 Powered by Gemini 2.5 Flash • Optimized for Video Generation Models
+            </p>
+            <p className="text-xs text-gray-600">
+                Author: <span className="text-gray-400 font-medium">Vũ Trọng</span> • Zalo: <span className="text-gray-400 font-medium">0835.242.357</span>
             </p>
         </div>
       </footer>
