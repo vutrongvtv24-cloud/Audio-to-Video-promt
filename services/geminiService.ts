@@ -1,5 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-import { SYSTEM_INSTRUCTION } from "../constants";
+import { getSystemInstruction } from "../constants";
 
 const getGeminiClient = () => {
   const apiKey = process.env.API_KEY;
@@ -31,7 +31,7 @@ const fileToGenerativePart = async (file: File): Promise<{ inlineData: { data: s
   });
 };
 
-export const analyzeAudio = async (audioFile: File): Promise<string> => {
+export const analyzeAudio = async (audioFile: File, styleModifier: string): Promise<string> => {
   try {
     const ai = getGeminiClient();
     
@@ -45,7 +45,7 @@ export const analyzeAudio = async (audioFile: File): Promise<string> => {
       contents: {
         parts: [
           audioPart,
-          { text: SYSTEM_INSTRUCTION }
+          { text: getSystemInstruction(styleModifier) }
         ]
       }
     });

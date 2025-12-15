@@ -2,7 +2,58 @@ export const APP_TITLE = "AI Video Director & Prompt Engineer";
 export const MAX_FILE_SIZE_MB = 10;
 export const SUPPORTED_AUDIO_TYPES = ["audio/mp3", "audio/mpeg", "audio/wav", "audio/aac", "audio/ogg", "audio/m4a"];
 
-export const SYSTEM_INSTRUCTION = `
+export const VIDEO_STYLES = [
+  { 
+    id: 'cinematic', 
+    name: 'Cinematic Movie', 
+    description: 'High budget, dramatic lighting, 8k, anamorphic lens, IMAX quality',
+    prompt_modifier: 'Cinematic lighting, photorealistic, 8k, shot on ARRI Alexa, color graded, dramatic atmosphere'
+  },
+  { 
+    id: 'photorealistic', 
+    name: 'Photorealistic / Documentary', 
+    description: 'Natural lighting, sharp focus, true-to-life details, 4k',
+    prompt_modifier: 'Hyper-realistic, documentary style, natural lighting, 4k, high texture detail, sharp focus'
+  },
+  { 
+    id: '3d-animation', 
+    name: '3D Animation (Pixar/Disney)', 
+    description: 'Vibrant colors, expressive characters, Unreal Engine 5 render',
+    prompt_modifier: '3D Animation style, Pixar style, Unreal Engine 5 render, vibrant colors, soft lighting, cute and expressive'
+  },
+  { 
+    id: 'anime', 
+    name: 'Anime / Japanese 2D', 
+    description: 'Hand-drawn feel, vibrant, Makoto Shinkai style',
+    prompt_modifier: 'Anime style, Makoto Shinkai art style, vibrant colors, detailed background art, high quality 2D animation'
+  },
+  { 
+    id: 'cyberpunk', 
+    name: 'Cyberpunk / Futuristic', 
+    description: 'Neon lights, dark atmosphere, high tech, sci-fi',
+    prompt_modifier: 'Cyberpunk style, neon lighting, futuristic city, rain-slicked streets, high tech, dark atmosphere, blade runner vibe'
+  },
+  { 
+    id: 'vintage', 
+    name: 'Vintage Film (16mm)', 
+    description: 'Film grain, retro colors, nostalgic feel, old movie',
+    prompt_modifier: 'Vintage 16mm film look, film grain, retro color palette, nostalgic atmosphere, light leaks, old movie style'
+  },
+  { 
+    id: 'claymation', 
+    name: 'Claymation / Stop Motion', 
+    description: 'Textured, handmade feel, Aardman style',
+    prompt_modifier: 'Claymation style, stop motion animation, plasticine texture, handmade look, studio lighting'
+  },
+  { 
+    id: 'fantasy', 
+    name: 'Fantasy Digital Art', 
+    description: 'Ethereal, magical, oil painting or concept art style',
+    prompt_modifier: 'Fantasy digital art, ethereal atmosphere, magical lighting, concept art style, highly detailed, dreamlike'
+  }
+];
+
+export const getSystemInstruction = (styleModifier: string) => `
 Bạn là một Chuyên gia Đạo diễn Video AI và Kỹ sư Prompt (AI Video Director & Prompt Engineer). Nhiệm vụ của bạn là nghe file audio đầu vào, phân tích nội dung và tạo ra các kịch bản hình ảnh (prompts) chi tiết để sinh video minh họa.
 
 Operational Rules (Quy tắc vận hành):
@@ -11,7 +62,8 @@ Operational Rules (Quy tắc vận hành):
 - Tách audio thành các đoạn Timestamp dựa trên sự thay đổi về nội dung.
 
 2. Thiết lập tính nhất quán tuyệt đối (Consistency Lock - QUAN TRỌNG NHẤT):
-- Trước tiên, định nghĩa một "Master Description": Mô tả cực kỳ chi tiết về ngoại hình nhân vật (tóc, màu da, quần áo cố định), bối cảnh chính, ánh sáng và phong cách nghệ thuật (ví dụ: cinematic lighting, photorealistic, 8k, Unreal Engine 5 render).
+- **User Selected Style:** Video này PHẢI tuân theo phong cách: "${styleModifier}".
+- Trước tiên, định nghĩa một "Master Description": Mô tả cực kỳ chi tiết về ngoại hình nhân vật (tóc, màu da, quần áo cố định), bối cảnh chính dựa trên phong cách đã chọn ở trên.
 - **YÊU CẦU BẮT BUỘC:** Trong danh sách prompt chi tiết, MỖI MỘT PROMPT ĐƠN LẺ đều PHẢI BẮT ĐẦU bằng toàn bộ nội dung của "Master Description".
 - Mục đích: Để đảm bảo khi đưa từng prompt này vào AI tạo video, nhân vật và bối cảnh không bị thay đổi. KHÔNG được viết tắt, KHÔNG được dùng từ tham chiếu như "nhân vật ấy". Phải lặp lại đầy đủ mô tả.
 
@@ -27,7 +79,8 @@ Hãy trình bày kết quả theo định dạng Markdown như sau:
 
 # PHÂN TÍCH TỔNG QUAN
 **Chủ đề:** [Tóm tắt nội dung]
-**Master Visual Style:** [Mô tả gốc dùng để lặp lại]
+**Selected Visual Style:** ${styleModifier}
+**Master Visual Style Description:** [Mô tả gốc dùng để lặp lại - Phải chi tiết và khớp với style đã chọn]
 
 # DANH SÁCH PROMPT CHI TIẾT
 

@@ -3,26 +3,33 @@ import { Video, Wand2, RefreshCw } from 'lucide-react';
 import AudioUploader from './components/AudioUploader';
 import LoadingState from './components/LoadingState';
 import ResultDisplay from './components/ResultDisplay';
+import StyleSelector from './components/StyleSelector';
 import { analyzeAudio } from './services/geminiService';
+import { VIDEO_STYLES } from './constants';
 
 const App: React.FC = () => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [selectedStyleId, setSelectedStyleId] = useState<string>(VIDEO_STYLES[0].id);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleFileSelect = (file: File) => {
     setAudioFile(file);
-    handleAnalyze(file);
+    handleAnalyze(file, selectedStyleId);
   };
 
-  const handleAnalyze = async (file: File) => {
+  const handleAnalyze = async (file: File, styleId: string) => {
     setIsAnalyzing(true);
     setError(null);
     setResult(null);
 
     try {
-      const analysisResult = await analyzeAudio(file);
+      // Find the full style object to get the modifier string
+      const styleObj = VIDEO_STYLES.find(s => s.id === styleId);
+      const styleModifier = styleObj ? styleObj.prompt_modifier : VIDEO_STYLES[0].prompt_modifier;
+
+      const analysisResult = await analyzeAudio(file, styleModifier);
       setResult(analysisResult);
     } catch (err: any) {
       console.error(err);
@@ -81,9 +88,17 @@ const App: React.FC = () => {
         )}
 
         <div className="flex flex-col items-center">
-            {/* Upload Section - Hidden when result is shown to keep UI clean, or shown if no file yet */}
+            
+            {/* Style Selector & Upload Section */}
             {(!audioFile || error) && (
-                 <AudioUploader onFileSelect={handleFileSelect} disabled={isAnalyzing} />
+                <>
+                    <StyleSelector 
+                        selectedStyleId={selectedStyleId} 
+                        onSelect={setSelectedStyleId} 
+                        disabled={isAnalyzing}
+                    />
+                    <AudioUploader onFileSelect={handleFileSelect} disabled={isAnalyzing} />
+                </>
             )}
 
             {/* Error Message */}
