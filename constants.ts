@@ -67,7 +67,7 @@ export const VIDEO_STYLES = [
     description: 'High budget, dramatic lighting, 8k, anamorphic lens',
     description_vi: 'Ngân sách cao, ánh sáng kịch tính, quay bằng lens Anamorphic',
     prompt_modifier: 'Cinematic lighting, photorealistic, 8k, shot on ARRI Alexa, color graded, dramatic atmosphere',
-    image: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=600&auto=format&fit=crop'
+    image: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=600&auto=format&fit=crop'
   },
   { 
     id: 'photorealistic', 
@@ -76,7 +76,7 @@ export const VIDEO_STYLES = [
     description: 'Natural lighting, sharp focus, true-to-life details',
     description_vi: 'Ánh sáng tự nhiên, sắc nét, chi tiết chân thực như phim tài liệu',
     prompt_modifier: 'Hyper-realistic, documentary style, natural lighting, 4k, high texture detail, sharp focus',
-    image: 'https://images.unsplash.com/photo-1552168324-d612d77725e3?q=80&w=600&auto=format&fit=crop'
+    image: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=600&auto=format&fit=crop'
   },
   { 
     id: '3d-animation', 
@@ -85,7 +85,7 @@ export const VIDEO_STYLES = [
     description: 'Pixar/Disney style, Unreal Engine 5 render',
     description_vi: 'Phong cách Pixar/Disney, kết xuất Unreal Engine 5 rực rỡ',
     prompt_modifier: '3D Animation style, Pixar style, Unreal Engine 5 render, vibrant colors, soft lighting, cute and expressive',
-    image: 'https://images.unsplash.com/photo-1633511090164-b43840ea1607?q=80&w=600&auto=format&fit=crop'
+    image: 'https://images.unsplash.com/photo-1617791160505-6f00504e3519?q=80&w=600&auto=format&fit=crop'
   },
   { 
     id: 'anime', 
@@ -121,7 +121,7 @@ export const VIDEO_STYLES = [
     description: 'Textured, handmade feel, Aardman style',
     description_vi: 'Chất liệu đất sét, thủ công, phong cách Aardman',
     prompt_modifier: 'Claymation style, stop motion animation, plasticine texture, handmade look, studio lighting',
-    image: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?q=80&w=600&auto=format&fit=crop'
+    image: 'https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?q=80&w=600&auto=format&fit=crop'
   },
   { 
     id: 'fantasy', 
@@ -131,6 +131,42 @@ export const VIDEO_STYLES = [
     description_vi: 'Huyền bí, phép thuật, phong cách tranh sơn dầu kỹ thuật số',
     prompt_modifier: 'Fantasy digital art, ethereal atmosphere, magical lighting, concept art style, highly detailed, dreamlike',
     image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop'
+  },
+  { 
+    id: 'watercolor', 
+    name: 'Watercolor', 
+    name_vi: 'Tranh màu nước',
+    description: 'Soft edges, artistic, flowing colors',
+    description_vi: 'Nét vẽ mềm, nghệ thuật, màu sắc lan tỏa',
+    prompt_modifier: 'Watercolor painting style, soft edges, flowing colors, artistic, pastel palette, textured paper background',
+    image: 'https://images.unsplash.com/photo-1580137189272-c9379f8864fd?q=80&w=600&auto=format&fit=crop'
+  },
+  { 
+    id: 'pixel-art', 
+    name: 'Pixel Art', 
+    name_vi: 'Nghệ thuật Pixel',
+    description: '8-bit, retro game style, blocky',
+    description_vi: '8-bit, phong cách game cổ điển, hình khối',
+    prompt_modifier: 'Pixel art style, 16-bit, retro game aesthetic, blocky, vibrant colors, dithering, arcade style',
+    image: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=600&auto=format&fit=crop'
+  },
+  { 
+    id: 'noir', 
+    name: 'Film Noir', 
+    name_vi: 'Phim Noir Đen Trắng',
+    description: 'Black & white, high contrast, mysterious',
+    description_vi: 'Đen trắng, tương phản cao, bí ẩn, kịch tính',
+    prompt_modifier: 'Film noir style, black and white, high contrast, dramatic shadows, silhouetted figures, moody atmosphere, 1940s detective style',
+    image: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=600&auto=format&fit=crop'
+  },
+  { 
+    id: 'low-poly', 
+    name: 'Low Poly 3D', 
+    name_vi: '3D Đa giác thấp',
+    description: 'Geometric, minimalistic, clean',
+    description_vi: 'Hình khối, tối giản, sạch sẽ, hiện đại',
+    prompt_modifier: 'Low poly style, isometric view, sharp edges, geometric shapes, soft lighting, minimalism, clean render',
+    image: 'https://images.unsplash.com/photo-1487887235947-a955ef187fcc?q=80&w=600&auto=format&fit=crop'
   }
 ];
 
