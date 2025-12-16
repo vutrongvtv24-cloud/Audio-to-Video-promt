@@ -33,13 +33,13 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ content, language }) => {
     const prompts = content
       .split('\n')
       .map(line => line.trim())
-      .filter(line => line.includes('Prompt #'))
+      .filter(line => line.toLowerCase().includes('prompt'))
       .map(line => {
         let clean = line.replace(/\*\*/g, ''); 
         clean = clean.replace(/^-/, ''); 
         return clean.trim();
       })
-      .filter(line => line.startsWith('Prompt #'));
+      .filter(line => line.toLowerCase().startsWith('prompt'));
 
     if (prompts.length === 0) {
        alert("No prompts found to export.");
@@ -76,7 +76,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ content, language }) => {
              </div>
          )
       }
-      if (line.includes('Timestamp:')) {
+      if (line.includes('Timestamp:') || line.includes('Segment')) {
           return <div key={index} className="text-yellow-400 font-mono mt-4 mb-1">{line}</div>
       }
       if (line.trim().startsWith('- **Prompt')) {
