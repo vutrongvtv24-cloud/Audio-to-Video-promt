@@ -152,14 +152,26 @@ const App: React.FC = () => {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-cinematic-800 bg-cinematic-900 py-8 mt-auto">
-        <div className="container mx-auto px-6 text-center space-y-2">
+      <footer className="border-t border-cinematic-800 bg-cinematic-900 py-8 mt-auto relative overflow-hidden">
+        {/* Decorative background glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-24 bg-cinematic-accent/5 blur-[100px] pointer-events-none"></div>
+        
+        <div className="container mx-auto px-6 text-center space-y-4 relative z-10">
             <p className="text-sm text-gray-500">
                 {t.footerPowered}
             </p>
-            <p className="text-xs text-gray-600">
-                {t.author}: <span className="text-gray-400 font-medium">Vũ Trọng</span> • {t.zalo}: <span className="text-gray-400 font-medium">0835.242.357</span>
-            </p>
+            
+            <div className="flex items-center justify-center mt-4">
+               <div className="group relative inline-flex items-center justify-center px-6 py-2 bg-cinematic-800/80 backdrop-blur-sm rounded-full border border-cinematic-700 hover:border-cinematic-500 transition-all duration-300 shadow-lg hover:shadow-cinematic-accent/20">
+                   <div className="flex items-center space-x-2 text-sm">
+                       <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">{t.author}:</span>
+                       <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 font-bold group-hover:from-indigo-300 group-hover:to-purple-300 transition-all">Vũ Trọng</span>
+                       <span className="text-gray-700 mx-2">|</span>
+                       <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">{t.zalo}:</span>
+                       <span className="text-gray-200 font-mono font-medium group-hover:text-white transition-colors">0835.242.357</span>
+                   </div>
+               </div>
+            </div>
         </div>
       </footer>
     </div>
