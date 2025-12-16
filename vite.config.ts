@@ -9,13 +9,15 @@ export default defineConfig(({ mode }) => {
 
   // Prioritize API_KEY, fallback to VITE_API_KEY if user named it that way
   const apiKey = env.API_KEY || env.VITE_API_KEY || process.env.API_KEY || process.env.VITE_API_KEY;
+  const apiKeyBackup = env.API_KEY_BACKUP || process.env.API_KEY_BACKUP;
 
   return {
     plugins: [react()],
     define: {
       // Vital: This makes process.env.API_KEY available to the client-side code
       // We JSON.stringify it to ensure it's inserted as a valid string literal
-      'process.env.API_KEY': JSON.stringify(apiKey)
+      'process.env.API_KEY': JSON.stringify(apiKey),
+      'process.env.API_KEY_BACKUP': JSON.stringify(apiKeyBackup || '')
     }
   };
 });

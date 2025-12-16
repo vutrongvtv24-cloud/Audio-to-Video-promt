@@ -2,14 +2,15 @@ import { GoogleGenAI } from "@google/genai";
 import { getVideoSystemInstruction, getImageSystemInstruction } from "../constants";
 
 // Define a pool of API Keys for rotation/failover
+// IMPORTANT: Add 'API_KEY_BACKUP' to your Vercel Environment Variables
 const API_KEYS = [
-  process.env.API_KEY, // Primary Key from Environment
-  "AIzaSyDHrITIXYlYCUS4ETOYv4WW6L1biOblpKM" // Secondary/Backup Key provided
+  process.env.API_KEY,        // Primary Key
+  process.env.API_KEY_BACKUP  // Secondary/Backup Key
 ].filter((key): key is string => !!key && key.length > 0);
 
 const getGeminiClient = (attemptIndex: number = 0) => {
   if (API_KEYS.length === 0) {
-    throw new Error("No API Keys found. Please configure API_KEY in .env or add to the key pool.");
+    throw new Error("No API Keys found. Please configure API_KEY (and optionally API_KEY_BACKUP) in .env or Vercel settings.");
   }
   
   // Rotate keys based on the attempt number (Round Robin)
