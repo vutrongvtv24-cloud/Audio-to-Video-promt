@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Video, Wand2, RefreshCw, Globe } from 'lucide-react';
+import { Video, Wand2, RefreshCw, Globe, Image as ImageIcon, Film } from 'lucide-react';
 import AudioUploader from './components/AudioUploader';
 import LoadingState from './components/LoadingState';
 import ResultDisplay from './components/ResultDisplay';
 import StyleSelector from './components/StyleSelector';
 import { analyzeAudio } from './services/geminiService';
-import { VIDEO_STYLES, TEXTS } from './constants';
+import { VIDEO_STYLES, IMAGE_STYLES, TEXTS } from './constants';
 
 const App: React.FC = () => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
@@ -14,24 +14,38 @@ const App: React.FC = () => {
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [language, setLanguage] = useState<'en' | 'vi'>('en');
+  const [mode, setMode] = useState<'video' | 'image'>('video'); 
 
   const t = TEXTS[language];
+  
+  // Determine the active list of styles based on the mode
+  const currentStyles = mode === 'video' ? VIDEO_STYLES : IMAGE_STYLES;
+
+  const handleModeChange = (newMode: 'video' | 'image') => {
+    setMode(newMode);
+    // Reset selection to the first item of the new list to avoid invalid IDs
+    const newStyles = newMode === 'video' ? VIDEO_STYLES : IMAGE_STYLES;
+    setSelectedStyleId(newStyles[0].id);
+  };
 
   const handleFileSelect = (file: File) => {
     setAudioFile(file);
-    handleAnalyze(file, selectedStyleId);
+    handleAnalyze(file, selectedStyleId, mode);
   };
 
-  const handleAnalyze = async (file: File, styleId: string) => {
+  const handleAnalyze = async (file: File, styleId: string, currentMode: 'video' | 'image') => {
     setIsAnalyzing(true);
     setError(null);
     setResult(null);
 
     try {
-      const styleObj = VIDEO_STYLES.find(s => s.id === styleId);
-      const styleModifier = styleObj ? styleObj.prompt_modifier : VIDEO_STYLES[0].prompt_modifier;
+      // Find style in the correct list
+      const styleList = currentMode === 'video' ? VIDEO_STYLES : IMAGE_STYLES;
+      const styleObj = styleList.find(s => s.id === styleId);
+      // Fallback if not found (shouldn't happen due to reset logic, but safe to have)
+      const styleModifier = styleObj ? styleObj.prompt_modifier : styleList[0].prompt_modifier;
 
-      const analysisResult = await analyzeAudio(file, styleModifier, language);
+      const analysisResult = await analyzeAudio(file, styleModifier, language, currentMode);
       setResult(analysisResult);
     } catch (err: any) {
       console.error(err);
@@ -57,12 +71,12 @@ const App: React.FC = () => {
       <header className="border-b border-cinematic-800 bg-cinematic-900/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-gradient-to-tr from-indigo-600 to-purple-600 rounded-lg shadow-lg">
-              <Video className="w-6 h-6 text-white" />
+            <div className={`p-2 rounded-lg shadow-lg transition-colors duration-500 ${mode === 'video' ? 'bg-gradient-to-tr from-indigo-600 to-purple-600' : 'bg-gradient-to-tr from-pink-600 to-rose-600'}`}>
+              {mode === 'video' ? <Video className="w-6 h-6 text-white" /> : <ImageIcon className="w-6 h-6 text-white" />}
             </div>
             <div>
               <h1 className="text-xl font-bold tracking-tight text-white hidden sm:block">{t.appTitle}</h1>
-              <h1 className="text-xl font-bold tracking-tight text-white sm:hidden">AI Video Director</h1>
+              <h1 className="text-xl font-bold tracking-tight text-white sm:hidden">AI Director</h1>
               <p className="text-xs text-indigo-400 font-mono tracking-wider">{t.role}</p>
             </div>
           </div>
@@ -105,6 +119,32 @@ const App: React.FC = () => {
                 <p className="text-lg text-gray-400 max-w-2xl mx-auto mb-10">
                     {t.heroDesc}
                 </p>
+
+                {/* MODE TOGGLE */}
+                <div className="inline-flex bg-cinematic-800 p-1 rounded-xl shadow-inner border border-cinematic-700">
+                    <button
+                        onClick={() => handleModeChange('video')}
+                        className={`flex items-center px-6 py-3 rounded-lg text-sm font-medium transition-all duration-300 ${
+                            mode === 'video' 
+                            ? 'bg-cinematic-700 text-white shadow-lg ring-1 ring-indigo-500/50' 
+                            : 'text-gray-400 hover:text-gray-200'
+                        }`}
+                    >
+                        <Film className="w-4 h-4 mr-2" />
+                        {t.modeVideo}
+                    </button>
+                    <button
+                        onClick={() => handleModeChange('image')}
+                        className={`flex items-center px-6 py-3 rounded-lg text-sm font-medium transition-all duration-300 ${
+                            mode === 'image' 
+                            ? 'bg-cinematic-700 text-white shadow-lg ring-1 ring-pink-500/50' 
+                            : 'text-gray-400 hover:text-gray-200'
+                        }`}
+                    >
+                        <ImageIcon className="w-4 h-4 mr-2" />
+                        {t.modeImage}
+                    </button>
+                </div>
             </div>
         )}
 
@@ -114,6 +154,7 @@ const App: React.FC = () => {
             {(!audioFile || error) && (
                 <>
                     <StyleSelector 
+                        styles={currentStyles} // Pass the correct list
                         selectedStyleId={selectedStyleId} 
                         onSelect={setSelectedStyleId} 
                         disabled={isAnalyzing}
@@ -161,7 +202,7 @@ const App: React.FC = () => {
                 {t.footerPowered}
             </p>
             
-            <div className="flex items-center justify-center mt-4">
+            <div className="flex flex-col items-center justify-center mt-4 space-y-3">
                <div className="group relative inline-flex items-center justify-center px-6 py-2 bg-cinematic-800/80 backdrop-blur-sm rounded-full border border-cinematic-700 hover:border-cinematic-500 transition-all duration-300 shadow-lg hover:shadow-cinematic-accent/20">
                    <div className="flex items-center space-x-2 text-sm">
                        <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">{t.author}:</span>
@@ -170,6 +211,13 @@ const App: React.FC = () => {
                        <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">{t.zalo}:</span>
                        <span className="text-gray-200 font-mono font-medium group-hover:text-white transition-colors">0835.242.357</span>
                    </div>
+               </div>
+
+               {/* Version Tag */}
+               <div className="inline-block mt-2">
+                  <span className="px-3 py-0.5 rounded-full text-[10px] font-bold tracking-[0.2em] text-white bg-gradient-to-r from-cyan-500 to-blue-500 shadow-[0_0_15px_rgba(6,182,212,0.6)] opacity-90 hover:opacity-100 hover:shadow-[0_0_20px_rgba(6,182,212,0.8)] transition-all cursor-default select-none border border-cyan-400/30">
+                    VER 1.1
+                  </span>
                </div>
             </div>
         </div>

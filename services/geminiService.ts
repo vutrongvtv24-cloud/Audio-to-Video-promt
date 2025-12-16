@@ -1,5 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-import { getSystemInstruction } from "../constants";
+import { getVideoSystemInstruction, getImageSystemInstruction } from "../constants";
 
 const getGeminiClient = () => {
   const apiKey = process.env.API_KEY;
@@ -31,12 +31,22 @@ const fileToGenerativePart = async (file: File): Promise<{ inlineData: { data: s
   });
 };
 
-export const analyzeAudio = async (audioFile: File, styleModifier: string, language: 'en' | 'vi'): Promise<string> => {
+export const analyzeAudio = async (
+  audioFile: File, 
+  styleModifier: string, 
+  language: 'en' | 'vi',
+  mode: 'video' | 'image' // Added mode parameter
+): Promise<string> => {
   try {
     const ai = getGeminiClient();
     
     // Prepare audio part
     const audioPart = await fileToGenerativePart(audioFile);
+
+    // Select the correct system instruction based on mode
+    const systemInstruction = mode === 'video' 
+      ? getVideoSystemInstruction(styleModifier, language)
+      : getImageSystemInstruction(styleModifier, language);
 
     // Call Gemini Model
     // Using gemini-2.5-flash as it is optimized for multimodal tasks and speed
@@ -45,7 +55,7 @@ export const analyzeAudio = async (audioFile: File, styleModifier: string, langu
       contents: {
         parts: [
           audioPart,
-          { text: getSystemInstruction(styleModifier, language) }
+          { text: systemInstruction }
         ]
       }
     });

@@ -1,15 +1,26 @@
 import React from 'react';
 import { Palette } from 'lucide-react';
-import { VIDEO_STYLES, TEXTS } from '../constants';
+import { TEXTS } from '../constants';
+
+interface StyleItem {
+  id: string;
+  name: string;
+  name_vi?: string;
+  description: string;
+  description_vi?: string;
+  prompt_modifier: string;
+  image: string;
+}
 
 interface StyleSelectorProps {
+  styles: StyleItem[]; // Changed to accept styles as prop
   selectedStyleId: string;
   onSelect: (styleId: string) => void;
   disabled: boolean;
   language: 'en' | 'vi';
 }
 
-const StyleSelector: React.FC<StyleSelectorProps> = ({ selectedStyleId, onSelect, disabled, language }) => {
+const StyleSelector: React.FC<StyleSelectorProps> = ({ styles, selectedStyleId, onSelect, disabled, language }) => {
   const t = TEXTS[language];
 
   return (
@@ -20,7 +31,7 @@ const StyleSelector: React.FC<StyleSelectorProps> = ({ selectedStyleId, onSelect
       </div>
       
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-2">
-        {VIDEO_STYLES.map((style) => {
+        {styles.map((style) => {
           const isSelected = selectedStyleId === style.id;
           return (
             <button
