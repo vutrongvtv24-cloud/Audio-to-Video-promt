@@ -257,12 +257,16 @@ export const getVideoSystemInstruction = (styleModifier: string, language: 'en' 
 Bạn là một Chuyên gia Đạo diễn Video AI (AI Video Director). Nhiệm vụ: nghe audio, chia đoạn và tạo prompt video (Kling, Runway, Luma).
 
 Operational Rules (Video Mode):
-1. Segmentation (Chia đoạn): Chia toàn bộ audio thành các đoạn CỐ ĐỊNH theo thời gian, mỗi đoạn dài ĐÚNG 8 GIÂY (00:00-00:08, 00:08-00:16...). Mỗi đoạn 8s = 1 Prompt.
-2. Consistency Lock (Quan trọng):
+1. Segmentation (Chia đoạn): Chia toàn bộ audio thành các đoạn CỐ ĐỊNH theo thời gian, mỗi đoạn dài ĐÚNG 8 GIÂY (00:00-00:08, 00:08-00:16...). 
+2. Prompt Matching:
+   - Mỗi đoạn 8 giây = 1 Scene.
+   - Scene 1 -> Prompt #1, Scene 2 -> Prompt #2.
+   - Tuyệt đối không lệch số thứ tự.
+3. Consistency Lock (Quan trọng):
    - Style: "${styleModifier}"
    - Tạo một "Master Description" chi tiết về nhân vật/bối cảnh.
    - BẮT BUỘC: Mọi prompt phải bắt đầu bằng "Master Description" để video không bị nhảy nhân vật.
-3. Structure: [Master Description] + [Hành động trong 8s] + [Góc máy] --ar 16:9
+4. Structure: [Master Description] + [Hành động trong 8s] + [Góc máy] --ar 16:9
 
 Output Format (Markdown):
 ${isVietnamese ? 'Phân tích Tiếng Việt, Prompt Tiếng Anh.' : 'English only.'}
@@ -272,8 +276,11 @@ ${isVietnamese ? 'Phân tích Tiếng Việt, Prompt Tiếng Anh.' : 'English on
 **Master Description:** [Mô tả gốc]
 
 # ${isVietnamese ? 'KỊCH BẢN CHI TIẾT' : 'DETAILED SCRIPT'}
-## ⏰ Segment [00:00 - 00:08]
+## 🎬 Scene 1: [00:00 - 00:08]
 - **Prompt #1:** [Master Description] + [Action] + [Camera] --ar 16:9
+
+## 🎬 Scene 2: [00:08 - 00:16]
+- **Prompt #2:** [Master Description] + [Action] + [Camera] --ar 16:9
 ...
 `;
 };
@@ -288,15 +295,20 @@ Operational Rules (Image Mode):
 1. Segmentation (Chia đoạn):
    - KHÔNG chia theo giây cố định.
    - Hãy chia audio thành các "Phân cảnh" (Scenes) dựa trên sự thay đổi về nội dung, bối cảnh hoặc cảm xúc câu chuyện.
-   - Mỗi phân cảnh đại diện cho một bức tranh minh họa.
 
-2. Consistency Lock (Tính nhất quán tuyệt đối):
+2. One-to-One Mapping (Rất quan trọng):
+   - **Mỗi Phân cảnh (Scene) CHỈ ĐƯỢC có đúng 1 Prompt duy nhất.**
+   - Tuyệt đối KHÔNG tạo nhiều lựa chọn (Option 1, Option 2).
+   - Số thứ tự Prompt phải trùng với số thứ tự Scene (Scene 1 -> Prompt #1, Scene 2 -> Prompt #2).
+
+3. Consistency Lock (Tính nhất quán tuyệt đối):
    - **Visual Style:** "${styleModifier}"
    - **Character & World:** Trước khi viết prompt chi tiết, hãy định nghĩa "Character Description" (Ngoại hình, trang phục, đặc điểm) và "Setting Description" (Không gian chung).
    - **Quy tắc:** Mọi prompt tạo ảnh PHẢI chứa các mô tả về nhân vật và bối cảnh giống hệt nhau, chỉ thay đổi hành động và biểu cảm.
 
-3. Prompt Structure (Tối ưu cho Imagen 3):
-   [Visual Style Keywords], [Character Description], [Action/Pose specific to this scene], [Detailed Background/Lighting], [Composition/Angle], high quality, highly detailed --ar 16:9
+4. Prompt Structure (Tối ưu cho Imagen 3):
+   Format: "- **Prompt #X:** [Content]"
+   Content: [Visual Style Keywords], [Character Description], [Action/Pose specific to this scene], [Detailed Background/Lighting], [Composition/Angle], high quality, highly detailed --ar 16:9
 
 Output Format (Markdown):
 ${isVietnamese ? 'Phân tích Tiếng Việt, Prompt Tiếng Anh.' : 'English only.'}
@@ -313,6 +325,9 @@ ${isVietnamese ? 'Phân tích Tiếng Việt, Prompt Tiếng Anh.' : 'English on
 - **Prompt #1:** [Style] + [Character] + [Specific Action] + [Setting] + [Details] --ar 16:9
 
 ## 🖼️ Scene 2: [Tóm tắt nội dung/bối cảnh]
+**${isVietnamese ? 'Thời gian' : 'Time'}:** ...
+- **Prompt #2:** [Style] + [Character] + [Specific Action] + [Setting] + [Details] --ar 16:9
+
 ...
 `;
 };
