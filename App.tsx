@@ -209,7 +209,14 @@ const App: React.FC = () => {
                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 font-bold group-hover:from-indigo-300 group-hover:to-purple-300 transition-all">Vũ Trọng</span>
                        <span className="text-gray-700 mx-2">|</span>
                        <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">{t.zalo}:</span>
-                       <span className="text-gray-200 font-mono font-medium group-hover:text-white transition-colors">0835.242.357</span>
+                       <a 
+                         href="https://zalo.me/0835242357" 
+                         target="_blank" 
+                         rel="noopener noreferrer" 
+                         className="text-gray-200 font-mono font-medium group-hover:text-white transition-colors hover:text-cinematic-accent hover:underline"
+                       >
+                         0835.242.357
+                       </a>
                    </div>
                </div>
 
