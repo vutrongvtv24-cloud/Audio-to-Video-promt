@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { Copy, Check, Download, Film, Palette, FileText } from 'lucide-react';
+import { Copy, Check, FileText, Film, Palette, Clock } from 'lucide-react';
 import { TEXTS } from '../constants';
 
 interface ResultDisplayProps {
@@ -17,22 +18,12 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ content, language }) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleDownload = () => {
-    const blob = new Blob([content], { type: 'text/markdown' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'video-director-prompts.md';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
-  const handleDownloadPrompts = () => {
-    const prompts = content
-      .split('\n')
-      .map(line => line.trim())
+  /**
+   * Export only the raw prompt strings
+   */
+  const handleDownloadCleanPrompts = () => {
+    const lines = content.split('\n').map(l => l.trim());
+    const prompts = lines
       .filter(line => line.toLowerCase().includes('prompt'))
       .map(line => {
         let clean = line.replace(/\*\*/g, ''); 
@@ -42,16 +33,64 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ content, language }) => {
       .filter(line => line.toLowerCase().startsWith('prompt'));
 
     if (prompts.length === 0) {
-       alert("No prompts found to export.");
+       alert(language === 'vi' ? "Không tìm thấy prompt để xuất." : "No prompts found to export.");
        return;
     }
 
     const textContent = prompts.join('\n\n');
-    const blob = new Blob([textContent], { type: 'text/plain' });
+    downloadFile(textContent, 'prompts_clean.txt');
+  };
+
+  /**
+   * Export Prompts along with their corresponding Scene Header and Timestamps
+   */
+  const handleDownloadDetailedPrompts = () => {
+    const lines = content.split('\n').map(l => l.trim());
+    let detailedContent = "";
+    let currentSceneHeader = "";
+    let currentTimeInfo = "";
+
+    lines.forEach(line => {
+      // Catch Scene Headers
+      if (line.startsWith('## ') && (line.toLowerCase().includes('scene') || line.toLowerCase().includes('shot'))) {
+        currentSceneHeader = line.replace(/#/g, '').trim();
+      }
+      // Catch Time/Timestamp lines
+      if (line.toLowerCase().includes('time:') || line.toLowerCase().includes('thời gian:') || /\[\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\]/.test(line)) {
+        currentTimeInfo = line.replace(/\*\*/g, '').trim();
+      }
+      // Catch Prompts
+      if (line.toLowerCase().includes('prompt #')) {
+        let cleanPrompt = line.replace(/\*\*/g, '').replace(/^-/, '').trim();
+        
+        if (currentSceneHeader) {
+          detailedContent += `${currentSceneHeader}\n`;
+        }
+        if (currentTimeInfo) {
+          detailedContent += `${currentTimeInfo}\n`;
+        }
+        detailedContent += `${cleanPrompt}\n\n`;
+        
+        // Reset buffers for next block
+        currentSceneHeader = "";
+        currentTimeInfo = "";
+      }
+    });
+
+    if (!detailedContent.trim()) {
+       // Fallback to full content if special parsing fails
+       detailedContent = content.replace(/\*\*/g, '').replace(/#/g, '');
+    }
+
+    downloadFile(detailedContent, 'prompts_detailed_with_time.txt');
+  };
+
+  const downloadFile = (text: string, filename: string) => {
+    const blob = new Blob([text], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'prompts_only.txt';
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -66,7 +105,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ content, language }) => {
       if (line.startsWith('## ')) {
         return <h2 key={index} className="text-xl font-semibold text-white mt-8 mb-3 flex items-center"><Film className="w-5 h-5 mr-2 text-yellow-500"/>{line.replace('## ', '')}</h2>;
       }
-      if (line.includes('**Master Visual Style Description:**') || line.includes('**Selected Visual Style:**')) {
+      if (line.includes('**Master Visual Style Description:**') || line.includes('**Selected Visual Style:**') || line.includes('**Consistent Character:**') || line.includes('**Consistent Setting:**')) {
          return (
              <div key={index} className="bg-indigo-900/30 border border-indigo-500/30 p-4 rounded-lg my-4">
                  <div className="flex items-center mb-2 text-indigo-400 font-bold uppercase text-xs tracking-wider">
@@ -76,7 +115,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ content, language }) => {
              </div>
          )
       }
-      if (line.includes('Timestamp:') || line.includes('Segment')) {
+      if (line.toLowerCase().includes('time:') || line.toLowerCase().includes('thời gian:') || line.includes('[00:')) {
           return <div key={index} className="text-yellow-400 font-mono mt-4 mb-1">{line}</div>
       }
       if (line.trim().startsWith('- **Prompt')) {
@@ -102,18 +141,20 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ content, language }) => {
         <h2 className="text-xl font-semibold text-white">{t.resultTitle}</h2>
         <div className="flex flex-wrap gap-2 justify-center">
             <button
-                onClick={handleDownloadPrompts}
-                className="flex items-center px-4 py-2 text-sm font-medium text-cinematic-accent bg-cinematic-800 border border-cinematic-700 rounded-lg hover:bg-cinematic-700 hover:border-cinematic-500 transition-all shadow-sm"
+                onClick={handleDownloadCleanPrompts}
+                className="flex items-center px-4 py-2 text-sm font-medium text-cinematic-accent bg-cinematic-800 border border-cinematic-700 rounded-lg hover:bg-cinematic-700 hover:border-cinematic-500 transition-all shadow-sm group"
+                title="Download only prompt text"
             >
-                <FileText className="w-4 h-4 mr-2" />
-                {t.exportTxt}
+                <FileText className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
+                {t.exportCleanTxt}
             </button>
             <button
-                onClick={handleDownload}
-                className="flex items-center px-4 py-2 text-sm font-medium text-cinematic-accent bg-cinematic-800 border border-cinematic-700 rounded-lg hover:bg-cinematic-700 hover:border-cinematic-500 transition-all shadow-sm"
+                onClick={handleDownloadDetailedPrompts}
+                className="flex items-center px-4 py-2 text-sm font-medium text-cinematic-accent bg-cinematic-800 border border-cinematic-700 rounded-lg hover:bg-cinematic-700 hover:border-cinematic-500 transition-all shadow-sm group"
+                title="Download prompts with timestamps and scene info"
             >
-                <Download className="w-4 h-4 mr-2" />
-                {t.downloadMd}
+                <Clock className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform text-yellow-500" />
+                {t.exportDetailedTxt}
             </button>
             <button
                 onClick={handleCopy}
