@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Video, Wand2, RefreshCw, Globe, Image as ImageIcon, Film } from 'lucide-react';
 import AudioUploader from './components/AudioUploader';
@@ -15,6 +16,7 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [language, setLanguage] = useState<'en' | 'vi'>('en');
   const [mode, setMode] = useState<'video' | 'image'>('video'); 
+  const [customStylePrompt, setCustomStylePrompt] = useState<string>('');
 
   const t = TEXTS[language];
   
@@ -25,6 +27,7 @@ const App: React.FC = () => {
     setMode(newMode);
     // Reset selection to the first item of the new list to avoid invalid IDs
     const newStyles = newMode === 'video' ? VIDEO_STYLES : IMAGE_STYLES;
+    // Default to the first style (which is custom style for images now)
     setSelectedStyleId(newStyles[0].id);
   };
 
@@ -39,17 +42,28 @@ const App: React.FC = () => {
     setResult(null);
 
     try {
-      // Find style in the correct list
-      const styleList = currentMode === 'video' ? VIDEO_STYLES : IMAGE_STYLES;
-      const styleObj = styleList.find(s => s.id === styleId);
-      // Fallback if not found (shouldn't happen due to reset logic, but safe to have)
-      const styleModifier = styleObj ? styleObj.prompt_modifier : styleList[0].prompt_modifier;
+      let styleModifier = '';
+
+      if (styleId === 'custom-style') {
+          // Custom style logic
+          if (!customStylePrompt.trim()) {
+               throw new Error(language === 'vi' ? "Vui lòng nhập mô tả cho Style tùy chỉnh của bạn." : "Please enter a description for your custom style.");
+          }
+          styleModifier = customStylePrompt;
+      } else {
+          // Predefined style logic
+          const styleList = currentMode === 'video' ? VIDEO_STYLES : IMAGE_STYLES;
+          const styleObj = styleList.find(s => s.id === styleId);
+          // Fallback if not found
+          styleModifier = styleObj ? styleObj.prompt_modifier : styleList[0].prompt_modifier;
+      }
 
       const analysisResult = await analyzeAudio(file, styleModifier, language, currentMode);
       setResult(analysisResult);
     } catch (err: any) {
       console.error(err);
       setError(err.message || "Something went wrong during analysis.");
+      // If error occurs, reset analyzing state but maybe keep the file selected so they can try again
     } finally {
       setIsAnalyzing(false);
     }
@@ -159,6 +173,8 @@ const App: React.FC = () => {
                         onSelect={setSelectedStyleId} 
                         disabled={isAnalyzing}
                         language={language}
+                        customPrompt={customStylePrompt}
+                        onCustomPromptChange={setCustomStylePrompt}
                     />
                     <AudioUploader 
                         onFileSelect={handleFileSelect} 
@@ -170,11 +186,17 @@ const App: React.FC = () => {
 
             {/* Error Message */}
             {error && (
-                <div className="w-full max-w-2xl mb-8 p-4 bg-red-900/50 border border-red-500/50 rounded-lg text-red-200 text-center">
+                <div className="w-full max-w-2xl mb-8 p-4 bg-red-900/50 border border-red-500/50 rounded-lg text-red-200 text-center animate-fadeIn">
                     <p className="font-semibold">{t.analysisFailed}</p>
                     <p className="text-sm opacity-80">{error}</p>
                     <button 
-                        onClick={() => handleReset()}
+                        onClick={() => {
+                            if (error.includes("Custom Style")) {
+                                setError(null); // Just clear error if it was a validation error
+                            } else {
+                                handleReset();
+                            }
+                        }}
                         className="mt-4 px-4 py-2 bg-red-800 hover:bg-red-700 rounded text-sm transition-colors"
                     >
                         {t.tryAgain}
@@ -223,7 +245,7 @@ const App: React.FC = () => {
                {/* Version Tag */}
                <div className="inline-block mt-2">
                   <span className="px-3 py-0.5 rounded-full text-[10px] font-bold tracking-[0.2em] text-white bg-gradient-to-r from-cyan-500 to-blue-500 shadow-[0_0_15px_rgba(6,182,212,0.6)] opacity-90 hover:opacity-100 hover:shadow-[0_0_20px_rgba(6,182,212,0.8)] transition-all cursor-default select-none border border-cyan-400/30">
-                    VER 1.2
+                    VER 1.3
                   </span>
                </div>
             </div>

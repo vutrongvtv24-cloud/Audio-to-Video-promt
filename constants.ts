@@ -1,3 +1,4 @@
+
 export const APP_TITLE = "AI Video Director & Prompt Engineer";
 export const MAX_FILE_SIZE_MB = 10;
 export const SUPPORTED_AUDIO_TYPES = ["audio/mp3", "audio/mpeg", "audio/wav", "audio/aac", "audio/ogg", "audio/m4a"];
@@ -138,115 +139,127 @@ export const VIDEO_STYLES = [
   },
 ];
 
-// --- NEW IMAGE STYLES (Optimized for Whisk/ImageFX/Imagen 3) ---
+// --- IMAGE STYLES (MATCHING CAPCUT UI) ---
 export const IMAGE_STYLES = [
-  { 
-    id: 'img-photography', 
-    name: 'Pro Photography', 
-    name_vi: 'Nhiếp ảnh Chuyên nghiệp',
-    description: 'DSLR, 85mm lens, bokeh, studio lighting',
-    description_vi: 'Máy ảnh DSLR, ống kính chân dung, xóa phông, ánh sáng studio',
-    prompt_modifier: 'Professional photography, shot on Sony A7R IV, 85mm lens, f/1.8, bokeh, studio lighting, hyper-realistic, 8k, sharp focus',
-    image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=600&q=80'
+  // 0. CUSTOM STYLE (New Input Feature)
+  {
+    id: 'custom-style',
+    name: 'Custom Style',
+    name_vi: 'Tùy chỉnh Style',
+    description: 'Enter your own visual style description...',
+    description_vi: 'Nhập mô tả phong cách hình ảnh của riêng bạn...',
+    prompt_modifier: '', // Will be overridden by user input
+    image: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=600&q=80'
   },
+  // 1. Realistic Film (Classic Portrait)
   { 
-    id: 'img-digital-art', 
-    name: 'Digital Art', 
-    name_vi: 'Tranh Vẽ Kỹ thuật số',
-    description: 'ArtStation style, vibrant, highly detailed',
-    description_vi: 'Phong cách ArtStation, rực rỡ, chi tiết cao',
-    prompt_modifier: 'Digital art, trending on ArtStation, highly detailed, vibrant colors, clean lines, masterpiece, concept art style',
-    image: 'https://images.unsplash.com/photo-1547891654-e66ed7ebb968?auto=format&fit=crop&w=600&q=80'
+    id: 'cap-realistic-film', 
+    name: 'Realistic Film', 
+    name_vi: 'Phim Thực tế',
+    description: 'Cinematic, 35mm film grain, atmospheric, high fidelity',
+    description_vi: 'Điện ảnh, hạt film 35mm, khí chất, độ chân thực cao',
+    prompt_modifier: 'Realistic film still, cinematic lighting, 35mm film grain, hyper-realistic, highly detailed, atmospheric, shot on Kodak Portra, 8k, professional portrait',
+    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80' 
   },
+  // 2. Cartoon 3D (3D Character)
   { 
-    id: 'img-oil-painting', 
-    name: 'Oil Painting', 
-    name_vi: 'Tranh Sơn Dầu',
-    description: 'Textured canvas, impasto, classic art',
-    description_vi: 'Vải canvas, vệt màu dày (impasto), nghệ thuật cổ điển',
-    prompt_modifier: 'Oil painting style, textured canvas, impasto brushstrokes, classic art style, rich colors, dramatic lighting, masterpiece',
-    image: 'https://images.unsplash.com/photo-1501472312651-726afe119ff1?auto=format&fit=crop&w=600&q=80'
+    id: 'cap-cartoon-3d', 
+    name: 'Cartoon 3D', 
+    name_vi: 'Hoạt hình 3D',
+    description: 'Cute, rounded shapes, Pixar style, soft lighting',
+    description_vi: 'Dễ thương, bo tròn, phong cách Pixar, ánh sáng mềm',
+    prompt_modifier: '3D cartoon style, Pixar animation style, soft studio lighting, cute character design, vibrant colors, 3D render, C4D, Redshift, expressive eyes, adorable',
+    image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=600&q=80'
   },
+  // 3. Urban Dream (City Nights / Anime Vibe - UPDATED LINK)
   { 
-    id: 'img-watercolor', 
-    name: 'Watercolor', 
-    name_vi: 'Tranh Màu Nước',
-    description: 'Soft, dreamy, wet-on-wet, paper texture',
-    description_vi: 'Mềm mại, mộng mơ, hiệu ứng loang màu, nền giấy',
-    prompt_modifier: 'Watercolor painting, soft pastel colors, wet-on-wet technique, textured paper background, artistic, dreamy, elegant',
-    image: 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&w=600&q=80'
+    id: 'cap-urban-dream', 
+    name: 'Urban Dream', 
+    name_vi: 'Giấc Mơ Đô Thị',
+    description: 'Soft anime, pastel city lights, lo-fi vibe, romantic',
+    description_vi: 'Anime mềm mại, ánh đèn thành phố pastel, lãng mạn',
+    prompt_modifier: 'Urban dream style, soft anime aesthetic, pastel city lights, lo-fi vibe, dreamy atmosphere, Makoto Shinkai inspired, romantic, soft focus, glowing, anime girl portrait',
+    image: 'https://images.unsplash.com/photo-1536566482680-fca31930a0bd?auto=format&fit=crop&w=600&q=80'
   },
+  // 4. Photograph (Wildlife - UPDATED LINK)
   { 
-    id: 'img-anime', 
-    name: 'Anime Illustration', 
-    name_vi: 'Minh họa Anime',
-    description: 'High quality 2D, wallpaper, detailed background',
-    description_vi: '2D chất lượng cao, hình nền đẹp, nền chi tiết',
-    prompt_modifier: 'Anime illustration, high quality 2D, Kyoto Animation style, detailed background, vibrant, beautiful lighting, 4k wallpaper',
-    image: 'https://images.unsplash.com/photo-1560972550-aba3456b5564?auto=format&fit=crop&w=600&q=80'
+    id: 'cap-photograph', 
+    name: 'Photograph', 
+    name_vi: 'Nhiếp ảnh Tự nhiên',
+    description: 'Sharp focus, wildlife or portrait, natgeo style',
+    description_vi: 'Sắc nét, phong cách NatGeo, chi tiết chân thực',
+    prompt_modifier: 'National Geographic photography style, wildlife photography, sharp focus, 8k, hyper-realistic, natural lighting, telephoto lens, detailed texture',
+    image: 'https://images.unsplash.com/photo-1561731216-c3a4d99437d5?auto=format&fit=crop&w=600&q=80'
   },
+  // 5. Whimsical (Soft Clouds / Pastel)
   { 
-    id: 'img-concept-art', 
-    name: 'Epic Concept Art', 
-    name_vi: 'Concept Art Sử thi',
-    description: 'Wide scale, matte painting, cinematic',
-    description_vi: 'Quy mô rộng lớn, tranh matte painting, không khí điện ảnh',
-    prompt_modifier: 'Epic concept art, matte painting, wide angle, atmospheric perspective, highly detailed, cinematic lighting, fantasy landscape',
-    image: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=600&q=80'
+    id: 'cap-whimsical', 
+    name: 'Whimsical', 
+    name_vi: 'Kỳ ảo Mộng mơ',
+    description: 'Fairy tale, soft pastel, ethereal, storybook illustration',
+    description_vi: 'Cổ tích, màu pastel, thanh thoát, minh họa truyện',
+    prompt_modifier: 'Whimsical art style, soft pastel colors, dreamy atmosphere, fairy tale illustration, delicate details, ethereal lighting, magical, storybook style, watercolor finish',
+    image: 'https://images.unsplash.com/photo-1516641396056-0ce60a85d49f?auto=format&fit=crop&w=600&q=80'
   },
+  // 6. Felt Dolls (Wool/Textured)
   { 
-    id: 'img-vector', 
-    name: 'Flat Vector Art', 
-    name_vi: 'Đồ họa Vector Phẳng',
-    description: 'Minimalist, clean shapes, Adobe Illustrator',
-    description_vi: 'Tối giản, hình khối sạch, phong cách Adobe Illustrator',
-    prompt_modifier: 'Flat vector art, minimalist, clean shapes, bold colors, Adobe Illustrator style, simple composition, graphic design',
-    image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80'
+    id: 'cap-felt-dolls', 
+    name: 'Felt Dolls', 
+    name_vi: 'Búp bê Len Nỉ',
+    description: 'Wool texture, needle felting, handmade, fuzzy, macro',
+    description_vi: 'Chất liệu len nỉ, thủ công, xù bông, chụp cận cảnh',
+    prompt_modifier: 'Felt doll style, needle felting texture, wool material, handmade craft look, macro photography, soft focus, cute and fuzzy, fabric details, stop motion vibe',
+    image: 'https://images.unsplash.com/photo-1550948537-130a1ce83314?auto=format&fit=crop&w=600&q=80'
   },
+  // 7. Crayon (Drawing)
   { 
-    id: 'img-sketch', 
-    name: 'Pencil Sketch', 
-    name_vi: 'Phác thảo Chì',
-    description: 'Charcoal, graphite, rough lines, artistic',
-    description_vi: 'Than chì, nét vẽ thô, nghệ thuật',
-    prompt_modifier: 'Pencil sketch, charcoal drawing, graphite, rough lines, shading, artistic, monochromatic, sketchbook style',
-    image: 'https://images.unsplash.com/photo-1582201942988-13e60e4556ee?auto=format&fit=crop&w=600&q=80'
+    id: 'cap-crayon', 
+    name: 'Crayon Art', 
+    name_vi: 'Tranh Sáp màu',
+    description: 'Wax texture, child drawing, colorful, rough paper',
+    description_vi: 'Chất liệu sáp, nét vẽ trẻ thơ, đầy màu sắc, giấy nhám',
+    prompt_modifier: 'Crayon drawing style, wax texture, child\'s drawing aesthetic, colorful, rough paper texture, naive art, playful, hand drawn, cute dinosaur',
+    image: 'https://images.unsplash.com/photo-1596495577886-d920f1fb7238?auto=format&fit=crop&w=600&q=80'
   },
+  // 8. Tiny World (Miniature figures)
   { 
-    id: 'img-surrealism', 
-    name: 'Surrealism', 
-    name_vi: 'Siêu thực',
-    description: 'Dreamlike, Salvador Dali style, abstract',
-    description_vi: 'Như giấc mơ, phong cách Salvador Dali, trừu tượng',
-    prompt_modifier: 'Surrealism art style, dreamlike, abstract, melting forms, strange juxtaposition, Salvador Dali inspired, mysterious',
-    image: 'https://images.unsplash.com/photo-1618331835717-801e976710b2?auto=format&fit=crop&w=600&q=80'
+    id: 'cap-tiny-world', 
+    name: 'Tiny World', 
+    name_vi: 'Thế giới Tí hon',
+    description: 'Tilt-shift, miniature diorama, macro lens, giant world',
+    description_vi: 'Hiệu ứng Tilt-shift, mô hình thu nhỏ, ống kính macro',
+    prompt_modifier: 'Tiny world effect, tilt-shift photography, miniature diorama, macro lens, shallow depth of field, giant world perspective, miniature figures, playful scale',
+    image: 'https://images.unsplash.com/photo-1460500063983-994d4c27756c?auto=format&fit=crop&w=600&q=80'
   },
+  // 9. Dreamscape (Surreal)
   { 
-    id: 'img-3d-render', 
-    name: '3D Octane Render', 
-    name_vi: '3D Render Octane',
-    description: 'Raytracing, realistic materials, studio light',
-    description_vi: 'Dò tia, vật liệu thực tế, ánh sáng studio',
-    prompt_modifier: '3D render, Octane render, raytracing, realistic materials, subsurface scattering, studio lighting, C4D, 8k, masterpiece',
-    image: 'https://images.unsplash.com/photo-1633412802994-5c058f151b66?auto=format&fit=crop&w=600&q=80'
+    id: 'cap-dreamscape', 
+    name: 'Dreamscape', 
+    name_vi: 'Cõi Mộng',
+    description: 'Surreal, magical objects, floating, golden light',
+    description_vi: 'Siêu thực, vật thể ma thuật, bay bổng, ánh sáng vàng',
+    prompt_modifier: 'Dreamscape art, surreal fantasy, magical objects, golden lighting, bokeh, ethereal, vibrant colors, imagination, christmas vibe',
+    image: 'https://images.unsplash.com/photo-1536697246787-1f7ae568d89a?auto=format&fit=crop&w=600&q=80'
   },
+  // 10. Dynamic (Motion - UPDATED LINK)
   { 
-    id: 'img-pop-art', 
-    name: 'Pop Art', 
-    name_vi: 'Nghệ thuật Pop Art',
-    description: 'Andy Warhol style, bold colors, comic dots',
-    description_vi: 'Phong cách Andy Warhol, màu đậm, chấm truyện tranh',
-    prompt_modifier: 'Pop art style, Andy Warhol inspired, halftone dots, bold colors, comic book aesthetic, retro, high contrast',
-    image: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=600&q=80'
+    id: 'cap-dynamic', 
+    name: 'Dynamic Action', 
+    name_vi: 'Hành động Kịch tính',
+    description: 'Motion blur, intense angles, speed lines, high energy',
+    description_vi: 'Mờ chuyển động, góc máy gắt, đường tốc độ, năng lượng cao',
+    prompt_modifier: 'Dynamic action shot, motion blur, intense perspective, fisheye lens, dramatic lighting, high energy, speed lines, cinematic composition, falling through sky',
+    image: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?auto=format&fit=crop&w=600&q=80'
   },
-  { 
-    id: 'img-cyberpunk', 
-    name: 'Cyberpunk', 
-    name_vi: 'Cyberpunk',
-    description: 'Neon, futuristic city, high tech',
-    description_vi: 'Đèn neon, thành phố tương lai, công nghệ cao',
-    prompt_modifier: 'Cyberpunk style, neon lights, futuristic city, rain, reflections, high tech, sci-fi atmosphere, vibrant colors',
-    image: 'https://images.unsplash.com/photo-1535295972055-1c762f4483e5?auto=format&fit=crop&w=600&q=80'
+  // 11. Sketch Color (New)
+  {
+    id: 'cap-sketch-color',
+    name: 'Sketch Color',
+    name_vi: 'Phác thảo Màu',
+    description: 'Hand-drawn, rough outlines, watercolor/marker, sketchbook texture',
+    description_vi: 'Vẽ tay, nét phác thảo thô, màu nước/marker, giấy vẽ',
+    prompt_modifier: 'Sketch color style, hand-drawn artwork, rough expressive outlines, graphite pencil or ink pen, loose and varied lines, watercolor washes, alcohol markers, white space, bleeding edges, sketchbook paper texture, artistic, vibrant, raw energy, draft aesthetic',
+    image: 'https://images.unsplash.com/photo-1579762715118-a6f1d4b934f1?auto=format&fit=crop&w=600&q=80'
   }
 ];
 
