@@ -11,6 +11,13 @@ const API_KEYS = [
 // --- KEY STATUS MONITORING SYSTEM ---
 export type KeyStatusType = 'idle' | 'active' | 'exhausted' | 'leaked';
 
+export interface SystemMetrics {
+  keyStates: KeyState[];
+  successCount: number;
+  errorCount: number;
+  avgLatency: number; // in ms
+}
+
 interface KeyState {
   index: number;
   status: KeyStatusType;
@@ -21,15 +28,26 @@ let keyStates: KeyState[] = API_KEYS.map((_, index) => ({
   index,
   status: 'idle'
 }));
+
 let successfulRequests = 0;
-let listeners: Array<(states: KeyState[], successCount: number) => void> = [];
+let errorCount = 0;
+let totalLatency = 0;
+let listeners: Array<(metrics: SystemMetrics) => void> = [];
+
+const getMetrics = (): SystemMetrics => ({
+  keyStates: [...keyStates],
+  successCount: successfulRequests,
+  errorCount: errorCount,
+  avgLatency: successfulRequests > 0 ? Math.round(totalLatency / successfulRequests) : 0
+});
 
 const notifyListeners = () => {
-  listeners.forEach(cb => cb([...keyStates], successfulRequests));
+  const metrics = getMetrics();
+  listeners.forEach(cb => cb(metrics));
 };
 
-export const subscribeToKeyStatus = (cb: (states: KeyState[], successCount: number) => void) => {
-  cb([...keyStates], successfulRequests); // Initial call
+export const subscribeToKeyStatus = (cb: (metrics: SystemMetrics) => void) => {
+  cb(getMetrics()); // Initial call
   listeners.push(cb);
   return () => {
     listeners = listeners.filter(l => l !== cb);
@@ -41,10 +59,16 @@ const updateKeyStatus = (index: number, status: KeyStatusType) => {
   notifyListeners();
 };
 
-const incrementSuccessCount = () => {
+const recordSuccess = (latencyMs: number) => {
   successfulRequests++;
+  totalLatency += latencyMs;
   notifyListeners();
 };
+
+const recordError = () => {
+  errorCount++;
+  notifyListeners();
+}
 
 // --- GEMINI CLIENT ---
 
@@ -92,7 +116,6 @@ export const analyzeAudio = async (
   language: 'en' | 'vi',
   mode: 'video' | 'image'
 ): Promise<string> => {
-  let lastError: any;
   // Increase retries to ensure we cycle through all keys at least once or twice
   const MAX_RETRIES = 4; 
 
@@ -106,6 +129,7 @@ export const analyzeAudio = async (
     // Retry Loop with Key Rotation
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       let currentKeyIndex = -1;
+      const startTime = Date.now();
       
       try {
         // Initialize client specifically for this attempt
@@ -133,14 +157,16 @@ export const analyzeAudio = async (
         }
         
         // Success
-        incrementSuccessCount();
+        const latency = Date.now() - startTime;
+        recordSuccess(latency);
+        
         // Keep status as 'active' (green) to show it's working
         updateKeyStatus(currentKeyIndex, 'active');
         
         return text; 
 
       } catch (error: any) {
-        lastError = error;
+        recordError();
         const errorMessage = error.message || error.toString();
         
         const isQuotaError = errorMessage.includes('429') || errorMessage.includes('exhausted');

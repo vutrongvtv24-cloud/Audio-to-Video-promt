@@ -38,7 +38,10 @@ export const TEXTS = {
     keysExhausted: "Quota Exceeded",
     keysLeaked: "Revoked/Leaked",
     sessionUsage: "Session Requests",
-    monitoring: "Monitoring API Key Health"
+    monitoring: "Monitoring API Key Health",
+    avgLatency: "Avg Latency",
+    totalErrors: "Total Errors",
+    currentModel: "Model"
   },
   vi: {
     appTitle: "Đạo diễn Video AI & Kỹ sư Prompt",
@@ -74,7 +77,10 @@ export const TEXTS = {
     keysExhausted: "Hết Quota (429)",
     keysLeaked: "Bị chặn/Lộ Key",
     sessionUsage: "Request trong phiên",
-    monitoring: "Giám sát sức khỏe API Key"
+    monitoring: "Giám sát sức khỏe API Key",
+    avgLatency: "Độ trễ TB",
+    totalErrors: "Tổng lỗi",
+    currentModel: "Model"
   }
 };
 
