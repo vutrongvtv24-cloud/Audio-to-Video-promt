@@ -5,6 +5,7 @@ import AudioUploader from './components/AudioUploader';
 import LoadingState from './components/LoadingState';
 import ResultDisplay from './components/ResultDisplay';
 import StyleSelector from './components/StyleSelector';
+import KeyMonitor from './components/KeyMonitor';
 import { analyzeAudio } from './services/geminiService';
 import { VIDEO_STYLES, IMAGE_STYLES, TEXTS } from './constants';
 
@@ -214,6 +215,9 @@ const App: React.FC = () => {
         </div>
       </main>
 
+      {/* Key Monitor Widget (Bottom Left) */}
+      <KeyMonitor language={language} />
+
       {/* Footer */}
       <footer className="border-t border-cinematic-800 bg-cinematic-900 py-8 mt-auto relative overflow-hidden">
         {/* Decorative background glow */}
@@ -245,7 +249,7 @@ const App: React.FC = () => {
                {/* Version Tag */}
                <div className="inline-block mt-2">
                   <span className="px-3 py-0.5 rounded-full text-[10px] font-bold tracking-[0.2em] text-white bg-gradient-to-r from-cyan-500 to-blue-500 shadow-[0_0_15px_rgba(6,182,212,0.6)] opacity-90 hover:opacity-100 hover:shadow-[0_0_20px_rgba(6,182,212,0.8)] transition-all cursor-default select-none border border-cyan-400/30">
-                    VER 1.3
+                    VER 1.4
                   </span>
                </div>
             </div>

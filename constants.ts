@@ -31,7 +31,14 @@ export const TEXTS = {
     copied: "Copied!",
     footerPowered: "Powered by Gemini 2.5 Flash • Optimized for Video Generation Models",
     author: "Author",
-    zalo: "Zalo"
+    zalo: "Zalo",
+    // Key Monitor
+    systemStatus: "System Status",
+    keysActive: "Keys Active",
+    keysExhausted: "Quota Exceeded",
+    keysLeaked: "Revoked/Leaked",
+    sessionUsage: "Session Requests",
+    monitoring: "Monitoring API Key Health"
   },
   vi: {
     appTitle: "Đạo diễn Video AI & Kỹ sư Prompt",
@@ -60,7 +67,14 @@ export const TEXTS = {
     copied: "Đã chép!",
     footerPowered: "Được hỗ trợ bởi Gemini 2.5 Flash • Tối ưu hóa cho các mô hình tạo video",
     author: "Tác giả",
-    zalo: "Zalo"
+    zalo: "Zalo",
+    // Key Monitor
+    systemStatus: "Trạng thái hệ thống",
+    keysActive: "Key Hoạt động",
+    keysExhausted: "Hết Quota (429)",
+    keysLeaked: "Bị chặn/Lộ Key",
+    sessionUsage: "Request trong phiên",
+    monitoring: "Giám sát sức khỏe API Key"
   }
 };
 

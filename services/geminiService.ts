@@ -1,12 +1,52 @@
+
 import { GoogleGenAI } from "@google/genai";
 import { getVideoSystemInstruction, getImageSystemInstruction } from "../constants";
 
 // Define a pool of API Keys for rotation/failover
-// IMPORTANT: Add 'API_KEY_BACKUP' to your Vercel Environment Variables
 const API_KEYS = [
   process.env.API_KEY,        // Primary Key
   process.env.API_KEY_BACKUP  // Secondary/Backup Key
 ].filter((key): key is string => !!key && key.length > 0);
+
+// --- KEY STATUS MONITORING SYSTEM ---
+export type KeyStatusType = 'idle' | 'active' | 'exhausted' | 'leaked';
+
+interface KeyState {
+  index: number;
+  status: KeyStatusType;
+}
+
+// Global state to track keys during runtime
+let keyStates: KeyState[] = API_KEYS.map((_, index) => ({
+  index,
+  status: 'idle'
+}));
+let successfulRequests = 0;
+let listeners: Array<(states: KeyState[], successCount: number) => void> = [];
+
+const notifyListeners = () => {
+  listeners.forEach(cb => cb([...keyStates], successfulRequests));
+};
+
+export const subscribeToKeyStatus = (cb: (states: KeyState[], successCount: number) => void) => {
+  cb([...keyStates], successfulRequests); // Initial call
+  listeners.push(cb);
+  return () => {
+    listeners = listeners.filter(l => l !== cb);
+  };
+};
+
+const updateKeyStatus = (index: number, status: KeyStatusType) => {
+  keyStates = keyStates.map(k => k.index === index ? { ...k, status } : k);
+  notifyListeners();
+};
+
+const incrementSuccessCount = () => {
+  successfulRequests++;
+  notifyListeners();
+};
+
+// --- GEMINI CLIENT ---
 
 const getGeminiClient = (attemptIndex: number = 0) => {
   if (API_KEYS.length === 0) {
@@ -14,16 +54,10 @@ const getGeminiClient = (attemptIndex: number = 0) => {
   }
   
   // Rotate keys based on the attempt number (Round Robin)
-  // Attempt 0 -> Key 0
-  // Attempt 1 -> Key 1
-  // Attempt 2 -> Key 0 ...
   const keyIndex = attemptIndex % API_KEYS.length;
   const apiKey = API_KEYS[keyIndex];
   
-  // Optional: Log which key slot is being used (for debugging, don't log full key)
-  // console.log(`Using API Key slot: ${keyIndex + 1}/${API_KEYS.length}`);
-
-  return new GoogleGenAI({ apiKey });
+  return { ai: new GoogleGenAI({ apiKey }), keyIndex };
 };
 
 /**
@@ -34,7 +68,6 @@ const fileToGenerativePart = async (file: File): Promise<{ inlineData: { data: s
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64String = reader.result as string;
-      // Remove the data URL prefix (e.g., "data:audio/mp3;base64,")
       const base64Data = base64String.split(",")[1];
       resolve({
         inlineData: {
@@ -72,10 +105,18 @@ export const analyzeAudio = async (
 
     // Retry Loop with Key Rotation
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      let currentKeyIndex = -1;
+      
       try {
-        // Initialize client specifically for this attempt (picks a key based on attempt count)
-        const ai = getGeminiClient(attempt - 1);
+        // Initialize client specifically for this attempt
+        const { ai, keyIndex } = getGeminiClient(attempt - 1);
+        currentKeyIndex = keyIndex;
         
+        // Mark as active if it was idle
+        if (keyStates[currentKeyIndex].status === 'idle') {
+            updateKeyStatus(currentKeyIndex, 'active');
+        }
+
         const response = await ai.models.generateContent({
           model: "gemini-2.5-flash",
           contents: {
@@ -90,48 +131,79 @@ export const analyzeAudio = async (
         if (!text) {
           throw new Error("No response generated from the model.");
         }
-
-        return text; // Success, return immediately
+        
+        // Success
+        incrementSuccessCount();
+        // Keep status as 'active' (green) to show it's working
+        updateKeyStatus(currentKeyIndex, 'active');
+        
+        return text; 
 
       } catch (error: any) {
         lastError = error;
         const errorMessage = error.message || error.toString();
         
-        // Detect 503, 429 (Quota), or Overloaded status
+        const isQuotaError = errorMessage.includes('429') || errorMessage.includes('exhausted');
+        const isLeakedError = errorMessage.includes('leaked') || errorMessage.includes('permission');
+        
+        // Update Status Monitor based on error type
+        if (currentKeyIndex !== -1) {
+            if (isQuotaError) {
+                updateKeyStatus(currentKeyIndex, 'exhausted');
+            } else if (isLeakedError) {
+                updateKeyStatus(currentKeyIndex, 'leaked');
+            }
+        }
+
+        // Detect 503, 429 (Quota), Overloaded, OR Key issues (Leaked/Invalid)
         const isTransientError = 
             errorMessage.includes('503') || 
             errorMessage.includes('429') || 
             errorMessage.includes('overloaded') || 
             errorMessage.includes('UNAVAILABLE') ||
-            errorMessage.includes('Resource has been exhausted');
+            errorMessage.includes('Resource has been exhausted') ||
+            errorMessage.includes('API key') || 
+            errorMessage.includes('leaked') || 
+            errorMessage.includes('permission'); 
 
         if (isTransientError && attempt < MAX_RETRIES) {
-          console.warn(`Attempt ${attempt} failed with key slot ${(attempt - 1) % API_KEYS.length}. Switching keys...`);
-          
-          // Exponential backoff, but faster since we are switching keys
-          // 1s, 2s, 3s...
+          console.warn(`Attempt ${attempt} failed with key slot. Switching keys...`);
           await delay(1000 * attempt); 
           continue; // Try again with next key
         }
 
-        // If it's not a temporary error, or we ran out of retries, break the loop
         throw error;
       }
     }
   } catch (error) {
     console.error("Error analyzing audio:", error);
     
-    // Format error message to be user-friendly
-    let cleanMessage = "An unexpected error occurred.";
+    let cleanMessage = language === 'vi' ? "Đã xảy ra lỗi không mong muốn." : "An unexpected error occurred.";
     
     if (error instanceof Error) {
         const msg = error.message;
+        const isVi = language === 'vi';
+
         if (msg.includes("503") || msg.includes("overloaded")) {
-            cleanMessage = "Servers are busy. We tried multiple API keys but traffic is high. Please try again in 1 minute.";
+            cleanMessage = isVi 
+              ? "Máy chủ đang bận. Chúng tôi đã thử nhiều key nhưng lưu lượng quá cao. Vui lòng thử lại sau 1 phút."
+              : "Servers are busy. We tried multiple API keys but traffic is high. Please try again in 1 minute.";
         } else if (msg.includes("429") || msg.includes("exhausted")) {
-            cleanMessage = "Daily quota exceeded on all available keys. Please try again later.";
+            cleanMessage = isVi
+              ? "Đã vượt quá hạn mức sử dụng (Quota) trên tất cả các key. Vui lòng thử lại sau."
+              : "Daily quota exceeded on all available keys. Please try again later.";
+        } else if (msg.includes("leaked")) {
+            cleanMessage = isVi
+              ? "API Key đã bị Google chặn do bị lộ (Leaked). Vui lòng tạo key mới và cập nhật cấu hình."
+              : "Your API Key was reported as leaked and blocked by Google. Please generate a new key.";
+        } else if (msg.includes("API key not valid") || msg.includes("permission")) {
+             cleanMessage = isVi
+              ? "API Key không hợp lệ hoặc không có quyền truy cập."
+              : "Invalid API Key or permission denied.";
         } else if (msg.includes("400")) {
-             cleanMessage = "Invalid request. The audio file might be corrupted or format not supported.";
+             cleanMessage = isVi
+              ? "Yêu cầu không hợp lệ. File âm thanh có thể bị lỗi hoặc định dạng không được hỗ trợ."
+              : "Invalid request. The audio file might be corrupted or format not supported.";
         } else {
              try {
                 if (msg.trim().startsWith('{')) {
@@ -151,5 +223,5 @@ export const analyzeAudio = async (
     throw new Error(cleanMessage);
   }
 
-  throw new Error("Analysis failed after multiple attempts.");
+  throw new Error(language === 'vi' ? "Phân tích thất bại sau nhiều lần thử." : "Analysis failed after multiple attempts.");
 };
