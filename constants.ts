@@ -41,7 +41,14 @@ export const TEXTS = {
     monitoring: "Monitoring API Key Health",
     avgLatency: "Avg Latency",
     totalErrors: "Total Errors",
-    currentModel: "Model"
+    currentModel: "Model",
+    // Health States
+    healthOperational: "Operational",
+    healthDegraded: "Degraded Performance",
+    healthCritical: "System Halted",
+    statusMessageNormal: "All systems functional. API traffic is normal.",
+    statusMessageDegraded: "Some keys have hit rate limits. Switching to backup keys automatically.",
+    statusMessageCritical: "All API keys have exceeded daily/minute quotas. Please verify billing or wait.",
   },
   vi: {
     appTitle: "Đạo diễn Video AI & Kỹ sư Prompt",
@@ -80,7 +87,14 @@ export const TEXTS = {
     monitoring: "Giám sát sức khỏe API Key",
     avgLatency: "Độ trễ TB",
     totalErrors: "Tổng lỗi",
-    currentModel: "Model"
+    currentModel: "Model",
+    // Health States
+    healthOperational: "Hoạt động tốt",
+    healthDegraded: "Hiệu năng giảm",
+    healthCritical: "Ngừng hoạt động",
+    statusMessageNormal: "Hệ thống ổn định. Lưu lượng API bình thường.",
+    statusMessageDegraded: "Một số Key đã đạt giới hạn Quota. Đang tự động chuyển Key dự phòng.",
+    statusMessageCritical: "Tất cả API Key đã hết hạn mức (Quota). Vui lòng kiểm tra thanh toán hoặc đợi.",
   }
 };
 
