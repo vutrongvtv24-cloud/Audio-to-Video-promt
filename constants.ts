@@ -42,6 +42,8 @@ export const TEXTS = {
     avgLatency: "Avg Latency",
     totalErrors: "Total Errors",
     currentModel: "Model",
+    checkHealth: "Check API Status",
+    checking: "Checking...",
     // Health States
     healthOperational: "Operational",
     healthDegraded: "Degraded Performance",
@@ -88,6 +90,8 @@ export const TEXTS = {
     avgLatency: "Độ trễ TB",
     totalErrors: "Tổng lỗi",
     currentModel: "Model",
+    checkHealth: "Kiểm tra API",
+    checking: "Đang kiểm tra...",
     // Health States
     healthOperational: "Hoạt động tốt",
     healthDegraded: "Hiệu năng giảm",

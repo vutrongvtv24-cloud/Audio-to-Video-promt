@@ -70,6 +70,39 @@ const recordError = () => {
   notifyListeners();
 }
 
+/**
+ * Manually check health of all keys by sending a minimal ping request
+ */
+export const checkAllKeysHealth = async (): Promise<void> => {
+    for (let i = 0; i < API_KEYS.length; i++) {
+        const apiKey = API_KEYS[i];
+        const ai = new GoogleGenAI({ apiKey });
+        
+        try {
+            const startTime = Date.now();
+            // Very small request to check status
+            await ai.models.generateContent({
+                model: "gemini-2.5-flash",
+                contents: "ping"
+            });
+            updateKeyStatus(i, 'active');
+            // We don't record this as a session success to avoid skewing metrics
+        } catch (error: any) {
+            const errorMessage = error.message || error.toString();
+            const isQuotaError = errorMessage.includes('429') || errorMessage.includes('exhausted') || errorMessage.includes('503') || errorMessage.includes('overloaded');
+            const isLeakedError = errorMessage.includes('leaked') || errorMessage.includes('permission') || errorMessage.includes('API key not valid');
+            
+            if (isQuotaError) {
+                updateKeyStatus(i, 'exhausted');
+            } else if (isLeakedError) {
+                updateKeyStatus(i, 'leaked');
+            } else {
+                updateKeyStatus(i, 'idle'); // Reset to idle if unknown
+            }
+        }
+    }
+};
+
 // --- GEMINI CLIENT ---
 
 const getGeminiClient = (attemptIndex: number = 0) => {
@@ -169,7 +202,7 @@ export const analyzeAudio = async (
         recordError();
         const errorMessage = error.message || error.toString();
         
-        const isQuotaError = errorMessage.includes('429') || errorMessage.includes('exhausted');
+        const isQuotaError = errorMessage.includes('429') || errorMessage.includes('exhausted') || errorMessage.includes('503') || errorMessage.includes('overloaded');
         const isLeakedError = errorMessage.includes('leaked') || errorMessage.includes('permission');
         
         // Update Status Monitor based on error type
